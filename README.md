@@ -8,8 +8,54 @@ This is a blazing fast Rust tool for calculating alpha diversity metrics directl
 
 This crate is specifically optimized for large-scale metagenomic data (like k-mer counts) where traditional observation vectors are memory-intensive. Here we take a histogram approach ($k$ abundance $\to$ $n_k$ features), so that even datasets with billions of individuals can be processed quickly and in constant memory relative to the number of unique abundance classes.
 
-## Installation
+You will first need to create a kmer count frequency histogram for each file with your prefered kmer count software, e.g. KMC3, Jellyfish
+You can produce histograms from sample metagenomic assemblies or from fastq reads
 
+## Installation 
+
+System Requirements
+OS: Linux, macOS, or Windows (via WSL2).
+
+Rust: Version 1.70 or higher (required for compilation), (can be installed with conda/mamba), if you prefer NOT to install Rust, metaKora could be called directly from Python, please leave a GitHub issue to request this feature
+
+Memory: Efficient O(1) memory usage relative to total individuals; performs well even on standard laptops with billion-count datasets.
+
+## 1. Using Conda/Mamba
+This is the best method for ensuring your environment is isolated and reproducible across different machines. 
+Use the included environment.yml 
+
+```
+conda env create -n metakora_env -f environment.yml
+conda activate metakora_env
+
+cargo install --git [https://github.com/LCrossman/metaKora.git](https://github.com/LCrossman/metaKora.git) --root $CONDA_PREFIX
+```
+
+### 2. Build from source 
+
+If you need to install Rust:
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+# Clone the repository
+```
+git clone https://github.com/LCrossman/metaKora.git
+cd metakora
+```
+# Build the optimized release binary using Rust Cargo 
+```
+cargo build --release
+```
+# The binary will be located at:
+```
+./target/release/metakora --filename <PATH_TO_FILE>
+```
+### Quick Start 
+
+```
+./target/release/metakora --help
+```
+Tests will be added shortly
 
 ## Features
 
