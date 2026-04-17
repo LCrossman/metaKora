@@ -10,6 +10,7 @@ This crate is specifically optimized for large-scale metagenomic data (like k-me
 
 ## Installation
 
+
 ## Features
 
 * **Memory Efficient:** Processes data as a "count of counts."
@@ -19,22 +20,24 @@ This crate is specifically optimized for large-scale metagenomic data (like k-me
 
 ## Diversity Metrics Supported
 
-| Metric | Function | Description |
-| :--- | :--- | :--- |
-| **Shannon Index ($H$)** | Measures uncertainty/diversity using natural logs. |
-| **Pielou’s Evenness ($J$)** | Measures how close the community is to numerical equality. |
-| **Chao1** | Predicts total richness including unobserved species (Bias-Corrected). |
-| **Robbins Estimator** | Probability that the next sample represents a new feature. |
-| **Berger-Parker** | Measure of dominance by the most abundant feature. |
-| **Simpson Index** | Probability that two individuals belong to different species ($1 - D$). |
+| Metric | Function | Description 
+| :--- | :--- | :--- 
+| **Shannon Index ($H$)** | Measures uncertainty/diversity using natural logs. 
+| **Pielou’s Evenness ($J$)** | Measures how close the community is to numerical equality. 
+| **Observed** | Count of total number of distinct kmers.
+| **Chao1** | Predicts total estimated richness/complexity of the sample considering total number of unique kmers. 
+| **Robbins Estimator** | Probability that the next sample represents a new feature. A 0 indicates that every kmer has already been seen.
+| **Berger-Parker** | Measure of dominance by the most abundant features. 
+| **Simpson Index** | Probability that two individuals belong to different species ($1 - D$). 
 
 ## Input Format
 
-The tool expects a two-column, space-separated file representing the kmer frequency histogram (no headers):
+meta*Kora* expects a two-column, tab-separated file representing the kmer frequency histogram (no headers):
 ```text
-1                  14502    # 14,502 species seen once (singletons)
-2                  3200     # 3,200 species seen twice (doubletons)
-15                 1        # 1 species seen fifteen times
+1                  14502    # 14,502 kmers seen once (singletons)
+2                  3200     # 3,200 kmers seen twice (doubletons)
+3                  1643     # 1,643 kmers seen three times
+4                  786      # 786 kmers seen 4 times...
 ```
 This type of file is outputted by kmer counting programs such as kmc3 and jellyfish 
 
