@@ -1,0 +1,7 @@
+name: metakora
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - rust
+  - git
