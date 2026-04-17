@@ -90,3 +90,10 @@ This type of file is outputted by kmer counting programs such as kmc3 and jellyf
 You can count kmers from each separate sample metagenomic assembly and run meta*Kora* on each file combining the results in a table for visualization in R 
 
 Please add any issues or requests for features in the GitHub issues.  One feature will be the ability to call this library directly from Python
+
+The output file is a print to stdout of a text file with a single line header: 
+```
+Sample	Shannon	H_max	Pielou	Chao1	Observed	Robbins	Berger_Parker	Simpson
+test_input.txt	9.783776	9.910016	0.987261	52991.625625	20131	0.500500	0.500500	0.660022
+```
+
