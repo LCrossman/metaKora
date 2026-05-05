@@ -85,7 +85,7 @@ meta*Kora* expects a two-column, tab-separated file representing the kmer freque
 3                  1643     # 1,643 kmers seen three times
 4                  786      # 786 kmers seen 4 times...
 ```
-This type of file is outputted by kmer counting programs such as kmc3 and jellyfish.  You may want to consider filtering rare reads at this stage, or rarefication by subsampling to the size of the smallest read file.
+This type of file is outputted by kmer counting programs such as kmc3 and jellyfish.  You may want to consider filtering rare reads at this stage, or rarefaction by subsampling all the samples to the size of the smallest read file.
 
 You can count kmers from each separate sample metagenomic assembly and run meta*Kora* on each file combining the results in a table for visualization in R 
 
