@@ -199,30 +199,96 @@ pub fn robbins(histogram: &HashMap<u32, u32>) -> f64 {
         .iter()
         .map(|(&k, &n_k)| (k as f64) * (n_k as f64))
         .sum();
-    if total > 0.0 {
-        n1 / total
-    } else {
-        0.0
+    if total > 0.0 { n1 / total } else { 0.0 }
+}
+//calculate the peak area dominance from HashMap
+pub fn peak_area_dominance_integrated(histogram: &HashMap<u32, u32>, noise_floor: u32) -> f64 {
+    //calculate Total Mass (N) for the entire library, including noise floor parameter
+    let total_mass: f64 = histogram
+        .iter()
+        .map(|(&k, &v)| (k as f64) * (v as f64))
+        .sum();
+
+    if total_mass <= 0.0 {
+        return 0.0;
+    }
+    //gatekeeper function to find a real "hump" in the histogram rather than just the first peak
+    let peak_x = find_highest_biological_peak(histogram, noise_floor);
+    match peak_x {
+        Some(x) => {
+            //calculate Area Under the peak (e.g., +/- 15% width)
+            let width = (x as f64 * 0.15).max(2.0) as u32;
+            let start = x.saturating_sub(width);
+            let end = x + width;
+            let peak_area: f64 = (start..=end)
+                .map(|abundance| {
+                    (abundance as f64) * (*histogram.get(&abundance).unwrap_or(&0) as f64)
+                })
+                .sum();
+            //calculate dominance of the peak
+            peak_area / total_mass
+        }
+        None => 0.0, //no biological "hump found, therefore no dominance
     }
 }
-//calculate the berger_parker dominance from HashMap
-pub fn berger_parker_d(histogram: &HashMap<u32, u32>) -> f64 {
-    let total: f64 = histogram
-        .iter()
-        .map(|(k, n_k)| (*k as f64) * (*n_k as f64))
-        .sum();
-    let mut max_class = 0.0;
-    for (count, n_k) in histogram {
-        let occ = (*count as f64) * (*n_k as f64);
-        if occ > max_class {
-            max_class = occ;
+
+//create a kmer peak finder to look for the "Best" peak
+fn find_highest_biological_peak(histogram: &HashMap<u32, u32>, noise_floor: u32) -> Option<u32> {
+    let mut best_peak_x = None;
+    let mut highest_frequency = 0;
+
+    let max_x = *histogram.keys().max().unwrap_or(&0);
+
+    //iterate to find local maxima
+    for x in noise_floor..(max_x) {
+        let prev = *histogram.get(&(x - 1)).unwrap_or(&0);
+        let curr = *histogram.get(&x).unwrap_or(&0);
+        let next = *histogram.get(&(x + 1)).unwrap_or(&0);
+
+        // Check if it's a "Hump" (local maximum)
+        if curr > prev && curr > next {
+            if curr > highest_frequency {
+                highest_frequency = curr;
+                best_peak_x = Some(x);
+            }
         }
     }
-    if total > 0.0 {
-        max_class / total
-    } else {
-        0.0
+    best_peak_x
+}
+pub fn berger_parker_d(histogram: &HashMap<u32, u32>, min_abundance: u32) -> f64 {
+    //actual berger_parker dominance, here of kmer rather than species, lends itself very sensitive to noise
+    let total: f64 = histogram
+        .iter()
+        .filter(|&(abundance, _)| *abundance >= min_abundance)
+        .map(|(abundance, frequency)| (*abundance as f64) * (*frequency as f64))
+        .sum();
+    if total <= 0.0 {
+        return 0.0;
     }
+    //n_max is the highest key at which min_abundance is reached
+    let n_max = histogram
+        .iter()
+        .filter(|&(_, frequency)| *frequency > 0)
+        .map(|(&abundance, _)| abundance)
+        .max()
+        .unwrap_or(0) as f64;
+    n_max / total
+}
+//previous berger_parker_d calculation is not strictly berger_parker dominance
+pub fn berger_parker_orig(histogram: &HashMap<u32, u32>) -> f64 {
+    let total: f64 = histogram
+        .iter()
+        .map(|(&abundance, &n_k)| (abundance as f64) * (n_k as f64))
+        .sum();
+    println!("total is {:?}", &total);
+    let n_max = histogram
+        .iter()
+        .filter(|&(_, &count)| count > 0)
+        .map(|(&abundance, _)| abundance)
+        .max()
+        .unwrap_or(0) as f64;
+    println!("n_max is {:?}", &n_max);
+    if total > 0.0 { n_max / total } else { 0.0 }
 }
 
 pub fn read_histogram_from_file(path: &str) -> Result<HashMap<u32, u32>, HistogramError> {
@@ -286,11 +352,14 @@ fn main() -> Result<(), HistogramError> {
     let o = observed_features(&histogram);
     let r = robbins(&histogram);
     let simp = simpson_index(&histogram);
-    let bpd = berger_parker_d(&histogram);
-    println!("Sample\tShannon\tH_max\tPielou\tChao1\tObserved\tRobbins\tBerger_Parker\tSimpson");
+    let peak = peak_area_dominance_integrated(&histogram, 5);
+    let bpd = berger_parker_d(&histogram, 2);
     println!(
-        "{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}",
-        &args.filename, Shannon, H_max, Pielou, c, o, r, bpd, simp
+        "Sample\tShannon\tH_max\tPielou\tChao1\tObserved\tRobbins\tBerger_Parker\tSimpson\tPeak_Area"
+    );
+    println!(
+        "{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{:.6}",
+        &args.filename, Shannon, H_max, Pielou, c, o, r, bpd, simp, peak
     );
     Ok(())
 }
