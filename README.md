@@ -73,8 +73,32 @@ Tests will be added shortly
 | **Observed** | Count of total number of distinct kmers.
 | **Chao1** | Predicts total estimated richness/complexity of the sample considering total number of unique kmers. 
 | **Robbins Estimator** | Probability that the next sample represents a new feature. A 0 indicates that every kmer has already been seen.
-| **Berger-Parker** | Measure of dominance by the most abundant features. 
-| **Simpson Index** | Probability that two individuals belong to different species ($1 - D$). 
+| **Inv Berger-Parker** | The reciprocal of the measure of dominance by the most abundant features, calculated after noise removal. 
+| **Simpson Index** | Probability that two individuals belong to different features ($1 - D$). 
+
+## Handling Noise Floor (min_abundance)
+By default, the script uses a peak-detection algorithm to find the "valley" after the initial noise spike. However, you can override this:
+
+Automatic (Default): The script finds the noise valley and biological peak automatically, logging the details .
+
+Manual: Use --min-abundance <INT> to skip a specific number of abundance classes.  Check the log for any warnings regarding if noise is still detected at the specified threshold.
+
+```bash
+./target/release/metakora --filename data.txt --min-abundance 10
+```
+
+## Diagnostics & Log Files
+Every run generates a log file (default: metakora.log). This file contains a Sensitivity Report which is vital for quality control. It includes:
+
+Noise vs. Bio Peak frequencies.
+
+Valley Depth Ratio: A value > 0.3 warns you if your noise is still ambiguous.
+
+Ambiguous Mass: The % of total k-mer mass sitting near the cutoff point.
+
+```bash
+./target/release/metakora --filename data.txt --log-file sample_A.log
+```
 
 ## Input Format
 
@@ -85,7 +109,7 @@ meta*Kora* expects a two-column, tab-separated file representing the kmer freque
 3                  1643     # 1,643 kmers seen three times
 4                  786      # 786 kmers seen 4 times...
 ```
-This type of file is outputted by kmer counting programs such as kmc3 and jellyfish.  You may want to consider filtering rare reads at this stage, or rarefaction by subsampling all the samples to the size of the smallest read file.
+**This type of file is outputted by kmer counting programs such as kmc3 and jellyfish.  You may want to consider filtering rare reads at this stage, or rarefaction by subsampling all the samples to the size of the smallest read file.**
 
 You can count kmers from each separate sample metagenomic assembly and run meta*Kora* on each file combining the results in a table for visualization in R 
 
@@ -96,4 +120,3 @@ The output file is a print to stdout of a text file with a single line header:
 Sample	Shannon	H_max	Pielou	Chao1	Observed	Robbins	Berger_Parker	Simpson
 test_input.txt	9.783776	9.910016	0.987261	52991.625625	20131	0.500500	0.500500	0.660022
 ```
-
