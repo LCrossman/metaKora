@@ -66,8 +66,8 @@ Tests will be added shortly
 
 ## Diversity Metrics Supported
 
-| Metric | Function | Description 
-| :--- | :--- | :--- 
+| Metric | Description 
+| :--- | :--- 
 | **Shannon Index ($H$)** | Measures uncertainty/diversity using natural logs. 
 | **Pielou’s Evenness ($J$)** | Measures how close the community is to numerical equality. 
 | **Observed** | Count of total number of distinct kmers.
