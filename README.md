@@ -117,6 +117,6 @@ Please add any issues or requests for features in the GitHub issues.  One featur
 
 The output file is a print to stdout of a text file with a single line header: 
 ```
-Sample	Shannon	H_max	Pielou	Chao1	Observed	Robbins	Berger_Parker	Simpson
-test_input.txt	9.783776	9.910016	0.987261	52991.625625	20131	0.500500	0.500500	0.660022
+Sample	Shannon	H_max	Pielou	Chao1	Observed	Robbins	Inv_Berger_Parker	Simpson	Peak_Area
+test_input.txt	9.783776	9.910016	0.987261	52991.625625	20131	0.500500	1.000000	0.660022	0.891493
 ```
